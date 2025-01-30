@@ -4,6 +4,7 @@ from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, Mo
 import threading
 import time
 import sys
+from datetime import datetime
 
 # Globale Variable für sicheres Beenden
 running = True
@@ -37,15 +38,16 @@ def poll_modbus_client():
 
     while running:
         response = client.read_discrete_inputs(address=0, count=8, slave=UNIT_ID)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if not response.isError():
             digital_inputs = response.bits
-            print(f"📥 Gelesene Eingänge: {digital_inputs}")
+            print(f"{timestamp} 📥 Gelesene Eingänge: {digital_inputs}")
 
             # Speichere die gelesenen Werte im lokalen Modbus-Server (als Digitale Eingänge)
             for i, value in enumerate(digital_inputs):
                 context[0x00].setValues(1, i, [int(value)])
         else:
-            print("❌ Fehler beim Lesen der Eingänge!")
+            print(f"{timestamp} ❌ Fehler beim Lesen der Eingänge!")
 
         time.sleep(1)  # Alle 1 Sekunde abfragen
 
